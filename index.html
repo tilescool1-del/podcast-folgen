@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Podcast – Folgen</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #f2f2f2;
+    color: #222;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+header {
+    background: #222;
+    color: white;
+    padding: 25px 20px;
+    text-align: center;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 30px;
+    font-weight: normal;
+}
+
+header p {
+    margin: 8px 0 0;
+    color: #ccc;
+}
+
+main {
+    width: 92%;
+    max-width: 850px;
+    margin: 30px auto;
+}
+
+.intro {
+    background: white;
+    padding: 22px;
+    border: 1px solid #ddd;
+    border-radius: 7px;
+    margin-bottom: 20px;
+}
+
+.intro h2 {
+    margin-top: 0;
+}
+
+.intro p {
+    color: #555;
+    line-height: 1.5;
+}
+
+/* Folgen */
+
+#episodes {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.episode {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 7px;
+    padding: 20px;
+}
+
+.episode-number {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 5px;
+}
+
+.episode h2 {
+    margin: 0 0 15px;
+    font-size: 22px;
+}
+
+.info {
+    margin: 8px 0;
+    line-height: 1.5;
+}
+
+.info strong {
+    display: inline-block;
+    width: 100px;
+}
+
+.topic {
+    background: #f7f7f7;
+    padding: 13px;
+    margin-top: 15px;
+    border-radius: 5px;
+    white-space: pre-wrap;
+    line-height: 1.5;
+}
+
+.people {
+    margin-top: 12px;
+    color: #444;
+}
+
+.no-episodes {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 7px;
+    padding: 25px;
+    text-align: center;
+    color: #777;
+}
+
+/* Admin Button */
+
+#adminButton {
+    position: fixed;
+    right: 6px;
+    bottom: 4px;
+    font-size: 9px;
+    color: #aaa;
+    cursor: pointer;
+}
+
+#adminButton:hover {
+    color: #555;
+}
+
+/* Hintergrund */
+
+#overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 50;
+}
+
+/* Admin Fenster */
+
+#adminPanel {
+    display: none;
+    position: fixed;
+    z-index: 100;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+
+    width: 92%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+#adminPanel h2 {
+    margin-top: 0;
+}
+
+.close {
+    float: right;
+    border: none;
+    background: #ddd;
+    padding: 7px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+label {
+    display: block;
+    margin-top: 12px;
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+input,
+textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+}
+
+textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+
+.admin-button {
+    margin-top: 15px;
+    background: #222;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.admin-button:hover {
+    background: #444;
+}
+
+.red-button {
+    background: #a22;
+}
+
+.red-button:hover {
+    background: #822;
+}
+
+.admin-episode {
+    border-top: 1px solid #ddd;
+    padding: 15px 0;
+    margin-top: 15px;
+}
+
+.admin-episode h3 {
+    margin: 0 0 5px;
+}
+
+.admin-episode p {
+    margin: 5px 0;
+    color: #555;
+}
+
+#adminContent {
+    display: none;
+}
+
+#error {
+    display: none;
+    color: #a00;
+    margin-top: 10px;
+}
+
+#success {
+    display: none;
+    color: #286328;
+    background: #e5f5e5;
+    padding: 9px;
+    margin-top: 12px;
+    border-radius: 5px;
+}
+
+footer {
+    text-align: center;
+    padding: 30px;
+    color: #888;
+    font-size: 12px;
+}
+
+/* Handy */
+
+@media (max-width: 600px) {
+
+    header h1 {
+        font-size: 25px;
+    }
+
+    main {
+        width: 94%;
+    }
+
+    .episode {
+        padding: 17px;
+    }
+
+    .info strong {
+        display: block;
+        width: auto;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>Unser Podcast</h1>
+    <p>Infos zu den nächsten Folgen</p>
+</header>
+
+<main>
+
+    <div class="intro">
+        <h2>Podcast-Aufnahmen</h2>
+
+        <p>
+            Hier stehen die Informationen zu unseren nächsten Podcast-Folgen.
+            Schaut vor der Aufnahme nach, worum es in der Folge geht und wer dabei ist.
+        </p>
+    </div>
+
+    <div id="episodes"></div>
+
+</main>
+
+<footer>
+    Podcast
+</footer>
+
+<!-- Kleiner Admin-Button -->
+<div id="adminButton" onclick="openAdmin()">Admin</div>
+
+<div id="overlay"></div>
+
+<!-- ADMIN -->
+<div id="adminPanel">
+
+    <button class="close" onclick="closeAdmin()">×</button>
+
+    <!-- LOGIN -->
+
+    <div id="login">
+
+        <h2>Admin</h2>
+
+        <p>Code eingeben:</p>
+
+        <input
+            type="password"
+            id="password"
+            placeholder="Code"
+        >
+
+        <button class="admin-button" onclick="login()">
+            Anmelden
+        </button>
+
+        <div id="error">
+            Falscher Code.
+        </div>
+
+    </div>
+
+
+    <!-- ADMIN BEREICH -->
+
+    <div id="adminContent">
+
+        <h2>Folge hinzufügen</h2>
+
+        <label>
+            Titel der Folge
+        </label>
+
+        <input
+            type="text"
+            id="title"
+            placeholder="z.B. Unser erster Podcast"
+        >
+
+
+        <label>
+            Datum
+        </label>
+
+        <input
+            type="date"
+            id="date"
+        >
+
+
+        <label>
+            Uhrzeit
+        </label>
+
+        <input
+            type="time"
+            id="time"
+        >
+
+
+        <label>
+            Thema der Folge
+        </label>
+
+        <textarea
+            id="topic"
+            placeholder="Worüber reden wir in dieser Folge?"
+        ></textarea>
+
+
+        <label>
+            Wer ist dabei?
+        </label>
+
+        <input
+            type="text"
+            id="people"
+            placeholder="z.B. Leano, Max und Luca"
+        >
+
+
+        <label>
+            Weitere Infos
+        </label>
+
+        <textarea
+            id="extra"
+            placeholder="Zum Beispiel Sachen, die mitgebracht werden müssen..."
+        ></textarea>
+
+
+        <button
+            class="admin-button"
+            onclick="addEpisode()"
+        >
+            Folge hinzufügen
+        </button>
+
+        <div id="success">
+            Folge wurde hinzugefügt.
+        </div>
+
+
+        <h2 style="margin-top:30px;">
+            Folgen verwalten
+        </h2>
+        <p style="background:#fff3cd;padding:10px;border-radius:5px;color:#664d03;">
+            GitHub-Version: Nach Änderungen wird <b>episodes.json</b> heruntergeladen.
+            Lade diese Datei danach auf GitHub hoch und ersetze die alte episodes.json.
+        </p>
+
+        <div id="adminEpisodes"></div>
+
+
+        <button
+            class="admin-button"
+            onclick="logout()"
+        >
+            Abmelden
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const ADMIN_CODE = "1023";
+
+let editIndex = -1;
+
+
+
+/* --------------------------------
+   GITHUB-PAGES DATEN
+   --------------------------------
+   GitHub Pages kann Dateien lesen, aber nicht direkt zurückschreiben.
+   Deshalb werden die Folgen aus episodes.json geladen.
+   Als Admin kann man die geänderten Daten als episodes.json exportieren
+   und diese Datei anschließend im GitHub-Repository ersetzen.
+   -------------------------------- */
+
+let cachedEpisodes = [];
+
+async function getEpisodes() {
+    try {
+        const response = await fetch("episodes.json?v=" + Date.now(), {
+            cache: "no-store"
+        });
+
+        if (!response.ok) {
+            throw new Error("episodes.json konnte nicht geladen werden.");
+        }
+
+        const data = await response.json();
+        cachedEpisodes = Array.isArray(data) ? data : [];
+        return cachedEpisodes;
+    } catch (error) {
+        console.error(error);
+        return cachedEpisodes;
+    }
+}
+
+function saveEpisodes(episodes) {
+    cachedEpisodes = episodes;
+}
+
+function downloadEpisodesJSON() {
+    const data = JSON.stringify(cachedEpisodes, null, 2);
+    const blob = new Blob([data], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "episodes.json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    URL.revokeObjectURL(url);
+}
+
+function addGitHubExportButton() {
+    if (document.getElementById("githubExportButton")) return;
+
+    const button = document.createElement("button");
+    button.id = "githubExportButton";
+    button.className = "admin-button";
+    button.textContent = "episodes.json herunterladen";
+    button.onclick = downloadEpisodesJSON;
+
+    const adminEpisodes = document.getElementById("adminEpisodes");
+    adminEpisodes.parentNode.insertBefore(button, adminEpisodes);
+}
+
+
+/* --------------------------------
+   HAUPTSEITE
+-------------------------------- */
+
+async function showEpisodes() {
+
+    const container = document.getElementById("episodes");
+
+    const episodes = await getEpisodes();
+
+    container.innerHTML = "";
+
+
+    if (episodes.length === 0) {
+
+        container.innerHTML = `
+            <div class="no-episodes">
+                Noch keine Folgen eingetragen.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    episodes.forEach(function(episode, index) {
+
+        const box = document.createElement("div");
+
+        box.className = "episode";
+
+
+        box.innerHTML = `
+            <div class="episode-number">
+                Folge ${index + 1}
+            </div>
+
+            <h2>${escapeHTML(episode.title)}</h2>
+
+            <div class="info">
+                <strong>Datum:</strong>
+                ${escapeHTML(episode.date || "-")}
+            </div>
+
+            <div class="info">
+                <strong>Uhrzeit:</strong>
+                ${escapeHTML(episode.time || "-")}
+            </div>
+
+            <div class="people">
+                <strong>Dabei:</strong>
+                ${escapeHTML(episode.people || "-")}
+            </div>
+
+            <div class="topic">
+                <strong>Thema:</strong><br><br>
+                ${escapeHTML(episode.topic || "-")}
+            </div>
+
+            ${
+                episode.extra
+                ?
+                `
+                <div class="topic">
+                    <strong>Weitere Infos:</strong><br><br>
+                    ${escapeHTML(episode.extra)}
+                </div>
+                `
+                :
+                ""
+            }
+        `;
+
+
+        container.appendChild(box);
+
+    });
+
+}
+
+
+/* --------------------------------
+   SICHERHEIT BEI TEXT
+-------------------------------- */
+
+function escapeHTML(text) {
+
+    if (!text) {
+        return "";
+    }
+
+    return text
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+
+/* --------------------------------
+   ADMIN ÖFFNEN
+-------------------------------- */
+
+function openAdmin() {
+
+    document.getElementById("overlay").style.display = "block";
+
+    document.getElementById("adminPanel").style.display = "block";
+
+    document.getElementById("password").focus();
+}
+
+
+function closeAdmin() {
+
+    document.getElementById("overlay").style.display = "none";
+
+    document.getElementById("adminPanel").style.display = "none";
+
+}
+
+
+/* --------------------------------
+   LOGIN
+-------------------------------- */
+
+function login() {
+
+    const password =
+        document.getElementById("password").value;
+
+    if (password === ADMIN_CODE) {
+
+        document.getElementById("login").style.display = "none";
+
+        document.getElementById("adminContent").style.display = "block";
+
+        document.getElementById("error").style.display = "none";
+
+        showAdminEpisodes();
+        addGitHubExportButton();
+
+    } else {
+
+        document.getElementById("error").style.display = "block";
+
+    }
+}
+
+
+/* Enter zum Einloggen */
+
+document
+    .getElementById("password")
+    .addEventListener("keydown", function(event) {
+
+        if (event.key === "Enter") {
+            login();
+        }
+
+    });
+
+
+/* --------------------------------
+   FOLGE HINZUFÜGEN
+-------------------------------- */
+
+async function addEpisode() {
+
+    const title =
+        document.getElementById("title").value.trim();
+
+    const date =
+        document.getElementById("date").value;
+
+    const time =
+        document.getElementById("time").value;
+
+    const topic =
+        document.getElementById("topic").value.trim();
+
+    const people =
+        document.getElementById("people").value.trim();
+
+    const extra =
+        document.getElementById("extra").value.trim();
+
+
+    if (!title || !topic) {
+
+        alert(
+            "Bitte mindestens Titel und Thema eingeben."
+        );
+
+        return;
+    }
+
+
+    const episodes = await getEpisodes();
+
+    const episode = {
+        title: title,
+        date: formatDate(date),
+        time: time,
+        topic: topic,
+        people: people,
+        extra: extra
+    };
+
+    if (editIndex === -1) {
+        episodes.push(episode);
+    } else {
+        episodes[editIndex] = episode;
+        editIndex = -1;
+    }
+
+    saveEpisodes(episodes);
+
+    clearForm();
+
+    await showEpisodes();
+    await showAdminEpisodes();
+
+    downloadEpisodesJSON();
+
+
+    const success =
+        document.getElementById("success");
+
+    success.textContent =
+        "Folge wurde gespeichert.";
+
+    success.style.display = "block";
+
+
+    setTimeout(function() {
+
+        success.style.display = "none";
+
+    }, 2000);
+
+}
+
+
+/* --------------------------------
+   DATUM
+-------------------------------- */
+
+function formatDate(date) {
+
+    if (!date) {
+        return "";
+    }
+
+    const parts = date.split("-");
+
+    return parts[2] + "." + parts[1] + "." + parts[0];
+}
+
+
+/* --------------------------------
+   ADMIN FOLGEN
+-------------------------------- */
+
+async function showAdminEpisodes() {
+
+    const container =
+        document.getElementById("adminEpisodes");
+
+    const episodes =
+        await getEpisodes();
+
+    container.innerHTML = "";
+
+
+    if (episodes.length === 0) {
+
+        container.innerHTML =
+            "<p>Noch keine Folgen.</p>";
+
+        return;
+    }
+
+
+    episodes.forEach(function(episode, index) {
+
+        const box =
+            document.createElement("div");
+
+        box.className =
+            "admin-episode";
+
+
+        box.innerHTML = `
+
+            <h3>
+                ${escapeHTML(episode.title)}
+            </h3>
+
+            <p>
+                ${escapeHTML(episode.date)}
+                ${episode.time ? " – " + escapeHTML(episode.time) : ""}
+            </p>
+
+            <p>
+                ${escapeHTML(episode.topic)}
+            </p>
+
+        `;
+
+
+        const editButton =
+            document.createElement("button");
+
+        editButton.className =
+            "admin-button";
+
+        editButton.textContent =
+            "Bearbeiten";
+
+        editButton.onclick =
+            function() {
+
+                editEpisode(index);
+
+            };
+
+
+        const deleteButton =
+            document.createElement("button");
+
+        deleteButton.className =
+            "admin-button red-button";
+
+        deleteButton.textContent =
+            "Löschen";
+
+        deleteButton.style.marginLeft =
+            "5px";
+
+        deleteButton.onclick =
+            function() {
+
+                deleteEpisode(index);
+
+            };
+
+
+        box.appendChild(editButton);
+
+        box.appendChild(deleteButton);
+
+
+        container.appendChild(box);
+
+    });
+
+}
+
+
+/* --------------------------------
+   BEARBEITEN
+-------------------------------- */
+
+async function editEpisode(index) {
+
+    const episodes =
+        await getEpisodes();
+
+    const episode =
+        episodes[index];
+
+
+    document.getElementById("title").value =
+        episode.title;
+
+
+    /* Datum zurück in YYYY-MM-DD */
+
+    if (episode.date) {
+
+        const parts =
+            episode.date.split(".");
+
+        if (parts.length === 3) {
+
+            document.getElementById("date").value =
+                parts[2] + "-" +
+                parts[1] + "-" +
+                parts[0];
+
+        }
+
+    }
+
+
+    document.getElementById("time").value =
+        episode.time;
+
+
+    document.getElementById("topic").value =
+        episode.topic;
+
+
+    document.getElementById("people").value =
+        episode.people;
+
+
+    document.getElementById("extra").value =
+        episode.extra;
+
+
+    editIndex = index;
+
+
+    window.scrollTo(0, 0);
+
+}
+
+
+/* --------------------------------
+   LÖSCHEN
+-------------------------------- */
+
+async function deleteEpisode(index) {
+
+    const ok =
+        confirm(
+            "Diese Folge wirklich löschen?"
+        );
+
+    if (!ok) {
+        return;
+    }
+
+    const episodes =
+        await getEpisodes();
+
+    episodes.splice(index, 1);
+
+    saveEpisodes(episodes);
+
+    await showEpisodes();
+    await showAdminEpisodes();
+
+    downloadEpisodesJSON();
+}
+
+
+/* --------------------------------
+   FORMULAR LEEREN
+-------------------------------- */
+
+function clearForm() {
+
+    document.getElementById("title").value = "";
+
+    document.getElementById("date").value = "";
+
+    document.getElementById("time").value = "";
+
+    document.getElementById("topic").value = "";
+
+    document.getElementById("people").value = "";
+
+    document.getElementById("extra").value = "";
+
+}
+
+
+/* --------------------------------
+   LOGOUT
+-------------------------------- */
+
+function logout() {
+
+    document.getElementById("login").style.display =
+        "block";
+
+    document.getElementById("adminContent").style.display =
+        "none";
+
+    document.getElementById("password").value =
+        "";
+
+    editIndex = -1;
+
+}
+
+
+/* --------------------------------
+   START
+-------------------------------- */
+
+showEpisodes();
+
+</script>
+
+</body>
+</html>
